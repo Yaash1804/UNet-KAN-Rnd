@@ -56,28 +56,30 @@ if __name__ == '__main__':
         num_classes = 1
         num_channels = 3
 
-        DATA_DIR = r'"/content/UNet-KAN-Rnd/data/ISIC/ISBI2016_ISIC_Part3B_Training_Data"'
-        DATA_DIR_TEST = r'"/content/UNet-KAN-Rnd/data/ISIC/ISBI2016_ISIC_Part3B_Test_Data"'
+        DATA_DIR = "/content/UNet-KAN-Rnd/data/ISIC/ISBI2016_ISIC_Part3B_Training_Data"
+        DATA_DIR_TEST = "/content/UNet-KAN-Rnd/data/ISIC/ISBI2016_ISIC_Part3B_Test_Data"
         #BUS_DATA_PATH = r'data\BUS'
 
         imagesListTrain = []
         maskListTrain = []
 
-        imagesListValid=[]
-        maskListValid=[]
+        print("Hello world")
 
         for idx in range(3):
             if idx == fold:
+                print(idx)
                 # Use raw strings or os.path.join to handle paths correctly
                 imagesListValid = glob(os.path.join(DATA_DIR, f"split{fold}", "images", "*.jpg"))
                 maskListValid = glob(os.path.join(DATA_DIR, f"split{fold}", "masks", "*.png"))
+                print(len(maskListValid))
             else:
                 # Append training images and masks from other splits
                 imagesListTrain.extend(glob(os.path.join(DATA_DIR, f"split{idx}", "images", "*.jpg")))
                 maskListTrain.extend(glob(os.path.join(DATA_DIR, f"split{idx}", "masks", "*.png")))
 
-        imagesListTest = glob(os.path.join(DATA_DIR_TEST, 'images', '*.jpg'))
-        maskListTest = glob(os.path.join(DATA_DIR_TEST, 'masks', '*.png'))
+        print("sid")
+        imagesListTest = glob(os.path.join(DATA_DIR_TEST, "images", "*.jpg"))
+        maskListTest = glob(os.path.join(DATA_DIR_TEST, "masks", "*.png"))
 
         '''BUS_test_images = glob(os.path.join(BUS_DATA_PATH, 'original', '*.png'))
         BUS_test_masks = glob(os.path.join(BUS_DATA_PATH, 'GT', '*.png'))'''
