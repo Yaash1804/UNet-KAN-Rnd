@@ -11,11 +11,12 @@ from PIL import Image
 import collections
 from tqdm import tqdm
 from collections import OrderedDict
+DEVICE="cpu"
 
 # Define the training function without the mixed precision
 def train_fn(loader, model, optimizer, loss_fn, scaler):
     loop = tqdm(loader)
-    DEVICE = 'cuda'
+    DEVICE = 'cpu'
     avg_meters = {'loss': AverageMeter(),
                   'iou': AverageMeter(),
                    'dice': AverageMeter(),
@@ -31,10 +32,9 @@ def train_fn(loader, model, optimizer, loss_fn, scaler):
         targets = targets.float().to(device=DEVICE)
 
         # forward
-        with torch.cuda.amp.autocast():
-            predictions = model(data)
-            loss = loss_fn(predictions, targets)
-            iou, dice, SE, PC, F1, SP, ACC = iou_score(predictions, targets)
+        predictions = model(data)
+        loss = loss_fn(predictions, targets)
+        iou, dice, SE, PC, F1, SP, ACC = iou_score(predictions, targets)
 
         # backward
         optimizer.zero_grad()
@@ -75,7 +75,7 @@ def train_fn(loader, model, optimizer, loss_fn, scaler):
                         ])
 
 def val_fn(loader, model, loss_fn):
-    DEVICE = 'cuda'
+    DEVICE = 'cpu'
     avg_meters = {'loss': AverageMeter(),
                   'iou': AverageMeter(),
                    'dice': AverageMeter(),
@@ -224,6 +224,8 @@ class BCEDiceLoss(nn.Module):
         super().__init__()
 
     def forward(self, input, target):
+        input = input.to(DEVICE)
+        target = target.to(DEVICE)
         bce = FF.binary_cross_entropy_with_logits(input, target)
         smooth = 1e-5
         input = torch.sigmoid(input)
