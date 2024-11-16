@@ -68,8 +68,7 @@ class FourierBasisFunction(nn.Module):
         return basis_functions
         
 class RadialBasisFunction(nn.Module):
-    def __init__(
-        self,
+    def __init__(self,
         grid_min: float = -2.,
         grid_max: float = 2.,
         num_grids: int = 4,
@@ -81,11 +80,11 @@ class RadialBasisFunction(nn.Module):
         self.denominator = denominator or (grid_max - grid_min) / (num_grids - 1)
 
     def forward(self, x):
-        return torch.exp(-((x[..., None] - self.grid) / self.denominator) ** 2)
-    
+      device = x.device  # Get the device of input tensor
+      return torch.exp(-((x[..., None].to(device) - self.grid.to(device)) / self.denominator) ** 2)
 
     
-    
+
 class SplineConv2D(nn.Conv2d):
     def __init__(self, 
                  in_channels: int, 
