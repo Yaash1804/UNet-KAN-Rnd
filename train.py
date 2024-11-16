@@ -29,7 +29,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str, default='ISIC', choices=['ISIC'])
     parser.add_argument('--fold', type=int, default=2)
     parser.add_argument('--img_size', type=int, default=225)
-    parser.add_argument('--model_dir', type=str, default='"D:\Academics\Sem 5\Rnd\UNet-KAN\KANU_Net\data\ISIC\Model"')
+    parser.add_argument('--model_dir', type=str, default="/content/UNet-KAN-Rnd/experiences")
     parser.add_argument('--loss', type=str, default='bcediceloss')
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--epochs', type=int, default=100)
@@ -56,12 +56,15 @@ if __name__ == '__main__':
         num_classes = 1
         num_channels = 3
 
-        DATA_DIR = r'"D:\Academics\Sem 5\Rnd\UNet-KAN\KANU_Net\data\ISIC\ISBI2016_ISIC_Part3B_Training_Data"'
-        DATA_DIR_TEST = r'"D:\Academics\Sem 5\Rnd\UNet-KAN\KANU_Net\data\ISIC\ISBI2016_ISIC_Part3B_Test_Data"'
+        DATA_DIR = r'"/content/UNet-KAN-Rnd/data/ISIC/ISBI2016_ISIC_Part3B_Training_Data"'
+        DATA_DIR_TEST = r'"/content/UNet-KAN-Rnd/data/ISIC/ISBI2016_ISIC_Part3B_Test_Data"'
         #BUS_DATA_PATH = r'data\BUS'
 
         imagesListTrain = []
         maskListTrain = []
+
+        imagesListValid=[]
+        maskListValid=[]
 
         for idx in range(3):
             if idx == fold:
