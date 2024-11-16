@@ -47,6 +47,7 @@ class Dataset(torch.utils.data.Dataset):
 
         image = image/255.0
         mask = mask/255.0
+        name="ISIC_"+str(idx)
 
         # return image, mask, self.images_list[idx]
-        return image, mask
+        return image, mask, name

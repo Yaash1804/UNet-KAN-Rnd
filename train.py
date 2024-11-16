@@ -26,13 +26,13 @@ from src.unet import U_Net
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Model train')
     parser.add_argument('--model', type=str, default='KANU_Net', choices=['KANU_Net', 'U_Net'])
-    parser.add_argument('--dataset', type=str, default='BUSI', choices=['BUSI'])
-    parser.add_argument('--fold', type=int, default=4)
-    parser.add_argument('--img_size', type=int, default=224)
-    parser.add_argument('--model_dir', type=str, default='experiences')
+    parser.add_argument('--dataset', type=str, default='ISIC', choices=['ISIC'])
+    parser.add_argument('--fold', type=int, default=2)
+    parser.add_argument('--img_size', type=int, default=225)
+    parser.add_argument('--model_dir', type=str, default='"D:\Academics\Sem 5\Rnd\UNet-KAN\KANU_Net\data\ISIC\Model"')
     parser.add_argument('--loss', type=str, default='bcediceloss')
-    parser.add_argument('--batch_size', type=int, default=8)
-    parser.add_argument('--epochs', type=int, default=300)
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--early_stopping_rounds', type=int, default=50)
@@ -51,41 +51,40 @@ if __name__ == '__main__':
     gpu = args.gpu
     early_stopping = args.early_stopping_rounds
 
-    if dataset == 'BUSI':
+    if dataset == 'ISIC':
         
         num_classes = 1
         num_channels = 3
 
-        DATA_DIR = r'data\splitted\train'
-        DATA_DIR_TEST = r'data\splitted\test'
-        BUS_DATA_PATH = r'data\BUS'
+        DATA_DIR = r'"D:\Academics\Sem 5\Rnd\UNet-KAN\KANU_Net\data\ISIC\ISBI2016_ISIC_Part3B_Training_Data"'
+        DATA_DIR_TEST = r'"D:\Academics\Sem 5\Rnd\UNet-KAN\KANU_Net\data\ISIC\ISBI2016_ISIC_Part3B_Test_Data"'
+        #BUS_DATA_PATH = r'data\BUS'
 
         imagesListTrain = []
-        makskListTrain = []
+        maskListTrain = []
 
-        for idx in range(5):
+        for idx in range(3):
             if idx == fold:
-                imagesListValid = glob(f"{DATA_DIR}/split{fold}/images"+'/*.png')
-                maskListValid = glob(f"{DATA_DIR}/split{fold}/masks"+'/*.png')
+                # Use raw strings or os.path.join to handle paths correctly
+                imagesListValid = glob(os.path.join(DATA_DIR, f"split{fold}", "images", "*.jpg"))
+                maskListValid = glob(os.path.join(DATA_DIR, f"split{fold}", "masks", "*.png"))
             else:
+                # Append training images and masks from other splits
+                imagesListTrain.extend(glob(os.path.join(DATA_DIR, f"split{idx}", "images", "*.jpg")))
+                maskListTrain.extend(glob(os.path.join(DATA_DIR, f"split{idx}", "masks", "*.png")))
 
-                for img in glob(f'{DATA_DIR}/split{idx}/images'+'/*.png'):
-                    imagesListTrain.append(img)
-                for msk in glob(f'{DATA_DIR}/split{idx}/masks'+'/*.png'):
-                    makskListTrain.append(msk)
+        imagesListTest = glob(os.path.join(DATA_DIR_TEST, 'images', '*.jpg'))
+        maskListTest = glob(os.path.join(DATA_DIR_TEST, 'masks', '*.png'))
 
-        imagesListTest = glob(os.path.join(DATA_DIR_TEST, 'images', '*.png'))
-        makskListTest = glob(os.path.join(DATA_DIR_TEST, 'masks', '*.png'))
+        '''BUS_test_images = glob(os.path.join(BUS_DATA_PATH, 'original', '*.png'))
+        BUS_test_masks = glob(os.path.join(BUS_DATA_PATH, 'GT', '*.png'))'''
 
-        BUS_test_images = glob(os.path.join(BUS_DATA_PATH, 'original', '*.png'))
-        BUS_test_masks = glob(os.path.join(BUS_DATA_PATH, 'GT', '*.png'))
-
-        print(f"Number of training images : {len(imagesListTrain)}, Number of training masks: {len(makskListTrain)}")
+        print(f"Number of training images : {len(imagesListTrain)}, Number of training masks: {len(maskListTrain)}")
         print(f"Number of images of validation images : {len(imagesListValid)}, number of validation masks: {len(maskListValid)}")
-        print(f"Number of testing images : {len(imagesListTest)}, Number of testing masks : {len(makskListTest)}")
-        print(f"Number of testing images on BUS dataset: {len(BUS_test_images)}, Number of testing masks : {len(BUS_test_masks)}")
+        print(f"Number of testing images : {len(imagesListTest)}, Number of testing masks : {len(maskListTest)}")
+        #print(f"Number of testing images on BUS dataset: {len(BUS_test_images)}, Number of testing masks : {len(BUS_test_masks)}")
 
-        num_masks_test = len(makskListTest)
+        num_masks_test = len(maskListTest)
 
         def mask_load_test(dir_path, imgs_list, masks_array):
             for i in range(len(imgs_list)):
@@ -101,7 +100,7 @@ if __name__ == '__main__':
             return masks_array
 
         masksTest = np.zeros((num_masks_test, 224, 224))
-        # masksTest = mask_load_test(os.path.join(DATA_DIR_TEST, 'masks'), makskListTest, masksTest)
+        masksTest = mask_load_test(os.path.join(DATA_DIR_TEST, 'masks'), maskListTest, masksTest)
 
         print("Test masks", masksTest.shape)
 
@@ -117,15 +116,15 @@ if __name__ == '__main__':
                 ])
 
         # Create the dataloader for training and validation
-        train_dataset = Dataset(imagesListTrain, makskListTrain, transform=transform)
+        train_dataset = Dataset(imagesListTrain, maskListTrain, transform=transform)
         valid_dataset = Dataset(imagesListValid, maskListValid)
-        test_dataset = Dataset(imagesListTest, makskListTest)
-        bus_test_dataset = Dataset(BUS_test_images, BUS_test_masks)
+        test_dataset = Dataset(imagesListTest, maskListTest)
+        #bus_test_dataset = Dataset(BUS_test_images, BUS_test_masks)
 
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
         test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-        bus_test_loader = torch.utils.data.DataLoader(bus_test_dataset, batch_size=batch_size, shuffle=False)
+        #bus_test_loader = torch.utils.data.DataLoader(bus_test_dataset, batch_size=batch_size, shuffle=False)
 
 
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
