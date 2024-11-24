@@ -32,7 +32,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_dir', type=str, default="/content/UNet-KAN-Rnd/experiences")
     parser.add_argument('--loss', type=str, default='bcediceloss')
     parser.add_argument('--batch_size', type=int, default=4)
-    parser.add_argument('--epochs', type=int, default=100)
+    parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--early_stopping_rounds', type=int, default=50)
